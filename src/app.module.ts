@@ -7,5 +7,6 @@ import { SeedModule } from './seed/seed.module';
   imports: [CarsModule, BrandsModule, SeedModule],
   controllers: [],
   providers: [],
+  exports: [],
 })
 export class AppModule {}

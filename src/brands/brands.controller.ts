@@ -1,70 +1,40 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
-
-import { Brand } from './entities/brand.entity';
-
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
+import { BrandsService } from './brands.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 
-@Injectable()
-export class BrandsService {
+@Controller('brands')
+export class BrandsController {
 
-  private brands: Brand[] = [
-    // {
-    //   id: uuid(),
-    //   name: 'Toyota',
-    //   createdAt: new Date().getTime()
-    // }
-  ]
+  constructor(
+    private readonly brandsService: BrandsService
+  ) {}
 
-  create(createBrandDto: CreateBrandDto) {
-    
-    const { name } = createBrandDto;
-
-    const brand: Brand = {
-      id: uuid(),
-      name: name.toLocaleLowerCase(),
-      createdAt: new Date().getTime(),
-    }
-
-    this.brands.push( brand );
-    
-    return brand;
+  @Post()
+  create(@Body() createBrandDto: CreateBrandDto) {
+    return this.brandsService.create(createBrandDto);
   }
 
+  @Get()
   findAll() {
-    return this.brands;
+    return this.brandsService.findAll();
   }
 
-  findOne(id: string ) {
-    const brand = this.brands.find( brand => brand.id === id );
-    if ( !brand ) 
-      throw new NotFoundException(`Brand with id "${ id }" not found`);
-
-    return brand;
+  @Get(':id')
+  findOne(@Param('id', ParseUUIDPipe ) id: string) {
+    return this.brandsService.findOne( id );
   }
 
-  update(id: string, updateBrandDto: UpdateBrandDto) {
-    
-    let brandDB = this.findOne( id );
-
-    this.brands = this.brands.map( brand => {
-      if( brand.id === id ) {
-        brandDB.updatedAt = new Date().getTime();
-        brandDB = { ...brandDB, ...updateBrandDto  }
-        return brandDB;
-      }
-      return brand;
-    });
-
-    return brandDB;
+  @Patch(':id')
+  update(
+    @Param('id', ParseUUIDPipe ) id: string, 
+    @Body() updateBrandDto: UpdateBrandDto
+  ) {
+    return this.brandsService.update( id, updateBrandDto );
   }
 
-  remove(id: string ) {
-    this.brands = this.brands.filter( brand => brand.id !== id );
-  }
-
-  fillCarsWithSeedData( brands: Brand[] ) {
-    this.brands = brands;
+  @Delete(':id')
+  remove(@Param('id', ParseUUIDPipe ) id: string) {
+    return this.brandsService.remove( id );
   }
 }
